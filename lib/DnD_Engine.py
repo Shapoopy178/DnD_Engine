@@ -29,12 +29,7 @@ class Game(object):
     
     def __init__(self):
         self.path = os.getcwd()
-        if self._install_check_() is False:
-            print('DnD_Engine not installed!')
-            print('Please run setup.py in desired installation folder.')
-            sys.exit()
-            return
-        pass
+        return 
     
     def PlaySession(self):
         pass
@@ -140,3 +135,10 @@ class Encounter(object):
     '''
     def __init__(self):
         pass
+
+def _install_check_():
+        RESOURCE_DIR = os.path.join(os.getcwd(), '.resources')
+        if os.path.isdir(RESOURCE_DIR) is False:
+            return False
+        else:
+            return True
