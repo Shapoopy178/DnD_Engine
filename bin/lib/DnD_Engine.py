@@ -1,3 +1,4 @@
+#Import dependencies
 import os
 import sys
 import openpyxl
@@ -14,6 +15,12 @@ class Game(object):
         Characters: list of PlayerCharacter objects
         
         Sessions: list of Session objects
+        
+        name: Name of Game for file read/write and reference purposes
+        
+        root_path: Root working directory for DnD_Engine instance
+        
+        bin_path: Subdirectory for DnD_Engine containing resources and binaries
     
     Methods:
         
@@ -27,16 +34,50 @@ class Game(object):
             Modify Game settings and metadata. 
     '''
     
-    def __init__(self):
-        self.path = os.getcwd()
-        if self._install_check_() is False:
-            print('DnD_Engine not installed!')
-            print('Please run setup.py in desired installation folder.')
-            sys.exit()
-            return
-        pass
+    def __init__(self, name):
+        '''
+        Inititalize Game instance. 
+        
+        Sets Game name and paths.
+        
+        Arguments:
+            
+            name: string
+                Name of Game for file read/write and reference purposes.
+                
+        Assignments:
+            
+            name: string
+                Name of Game for file read/write and reference purposes.
+                
+            root_path: string, absolute path
+                Root working directory for DnD_Engine instance.
+            
+            bin_path: string, absolute path
+                Subdirectory for DnD_Engine containing resources and binaries.
+            
+            resources_dir: string, absolute path
+                Hidden subdirectory of bin_path containing cached resources and assets.
+                
+            game_dir: string, absolute path
+                Game files directory, containing game-specific settings and files.
+                root/Games/<game_dir>
+        '''
+        self.name = name
+        self.root_path = os.getcwd()[:-4]
+        self.bin_path = os.path.join(self.root_path, 'bin')
+        self.resources_dir = os.path.join(self.bin_path,'.resources')
+        GAMES_DIR = os.path.join(self.root_path, 'Games')
+        try:
+            self.game_dir = os.path.join(GAMES_DIR, name)
+            os.mkdir(self.game_dir)            
+        except:
+            print('Could not create game directory.')
+        return 
     
     def PlaySession(self):
+        '''   
+        '''
         pass
     
     def ConfigureGame(self):
@@ -45,23 +86,27 @@ class Game(object):
     def NewGame(self):
         
         #Create base monster manual
-        self._write_monster_manual('default')
+        self._write_monster_manual()
         
-    def _write_monster_manual(self, mode = ''):
+    def _write_monster_manual(self):
         
-        manual_fname = os.path.join(self.path, 'bin', 'monsterManual.txt')
+        if self._install_check_():
             
-        if os.path.isfile(manual_fname) is not True:
-            
-            self._init_monster_manual(manual_fname)
+            self._init_monster_manual()
             
             return
         
-    def _init_monster_manual(self, fname):
+        else:
+            
+            print('Error: Monster manual could not be found.')
+        
+    def _init_monster_manual(self):
         print('Initializing Monster Manual...')
-        BASE_MANUAL_PATH = os.path.join(self.path, 'docs')
-        BASE_MANUAL_FNAME_W_PATH = os.path.join(BASE_MANUAL_PATH, '5E Monster Spreadsheet.xlsx')
+        BASE_MANUAL_FNAME_W_PATH = os.path.join(self.resources_dir, '5E_mM_.xlsx')
         wb = openpyxl.load_workbook(BASE_MANUAL_FNAME_W_PATH)
+        self.Workbook = wb
+        self._Workbook_fname = os.path.join(self.game_dir,'Monster Manual.xlsx')
+        self.Workbook.save(self._Workbook_fname)
         monsters_sheet = wb['Monsters']
         monster_metadata = monsters_sheet['A1:N1'][0]
         monster_data = monsters_sheet['A2:N1062']
@@ -87,8 +132,7 @@ class Game(object):
         return
     
     def _install_check_(self):
-        RESOURCE_DIR = os.path.join(self.path, '.resources')
-        if os.path.isdir(RESOURCE_DIR) is False:
+        if os.path.isdir(self.resources_dir) is False:
             return False
         else:
             return True
@@ -140,3 +184,10 @@ class Encounter(object):
     '''
     def __init__(self):
         pass
+
+def _install_check_():
+        RESOURCE_DIR = os.path.join(os.getcwd(), '.resources')
+        if os.path.isdir(RESOURCE_DIR) is False:
+            return False
+        else:
+            return True
