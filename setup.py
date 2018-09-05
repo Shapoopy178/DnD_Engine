@@ -10,13 +10,17 @@ import openpyxl
 ROOT_PATH = os.getcwd()
 DOCS_PATH = os.path.join(ROOT_PATH,'docs')
 BIN_PATH = os.path.join(ROOT_PATH,'bin')
-RESOURCES_PATH = os.path.join(ROOT_PATH,'.resources')
+RESOURCES_PATH = os.path.join(BIN_PATH,'.resources')
 GAMES_PATH = os.path.join(ROOT_PATH,'Games')
+
+print('Installing DnD_Engine...')
 
 while True:
     
     try:
+        print('Creating directories...')
         os.mkdir(RESOURCES_PATH)
+        os.mkdir(GAMES_PATH)
     except FileExistsError:
         
         print('Warning! Previous installation detected. Proceed with caution.')
@@ -42,3 +46,5 @@ while True:
     red_mm.save(reduced_core_monster_manual)
     
     break
+
+print('Done!')
