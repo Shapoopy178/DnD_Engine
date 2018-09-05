@@ -146,13 +146,70 @@ class Session(object):
 class Character(object):
     '''
     '''
-    def __init__(self):
-        pass
+    def __init__(self, name):
+        self.Name = name
+        self.Class = ''
+        self.Level = 0
+        self.Race = ''
+        self.Alignment = ''
+        self.Attributes = {
+                'Strength'      :       0,
+                'Dexterity'     :       0,
+                'Constitution'  :       0,
+                'Intelligence'  :       0,
+                'Wisdon'        :       0,
+                'Charisma'      :       0
+                }
+        self.SavingThrows = {
+                'Strength'      :       (False, 0),
+                'Dexterity'     :       (False, 0),
+                'Constitution'  :       (False, 0),
+                'Intelligence'  :       (False, 0),
+                'Wisdon'        :       (False, 0),
+                'Charisma'      :       (False, 0)
+                }
+        self.Skills = {
+                'Acrobatics'        :       (False, 0),
+                'Animal Handline'   :       (False, 0),
+                'Arcana'            :       (False, 0),
+                'Athletics'         :       (False, 0),
+                'Deception'         :       (False, 0),
+                'History'           :       (False, 0),
+                'Insight'           :       (False, 0),
+                'Intimidation'      :       (False, 0),
+                'Investigation'     :       (False, 0),
+                'Medicine'          :       (False, 0),
+                'Nature'            :       (False, 0),
+                'Perception'        :       (False, 0),
+                'Performance'       :       (False, 0),
+                'Persuasion'        :       (False, 0),
+                'Religion'          :       (False, 0),
+                'Sleight of Hand'   :       (False, 0),
+                'Stealth'           :       (False, 0),
+                'Survival'          :       (False, 0)
+                }
+        self.ArmorClass = 0
+        self.Speed = 0
+        self.HitPoints = 0
+        self.HitPoints_Max = 0
 
 class PlayerCharacter(Character):
     '''
     '''
-    def __init__(self):
+    def __init__(self, name):
+        Character.__init__(self, name)
+        self.Inspiration = 0
+        self.Proficiency = 0
+        self.Initiative = 0
+        self.Background = ''
+        self.PlayerName = ''
+        self.Experience = 0
+        self.PersonalityTraits = ''
+        self.Ideals = ''
+        self.Bonds = ''
+        self.Flaws = ''
+        self.Features = ''
+        self.Traits = ''
         pass
 
 class NPC(Character):
@@ -165,9 +222,11 @@ class Monster(Character):
     '''
     '''
     
-    def __init__(self, monster_type):
+    def __init__(self, monster_type, name = ''):
         
         self.type = monster_type.upper()
+        if not name == '':
+            self.Name = name
         
         try:
             
