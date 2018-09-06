@@ -1,6 +1,7 @@
 #Import dependencies
 import os
 import sys
+import random
 import openpyxl
 
 class Game(object):
@@ -211,6 +212,85 @@ class PlayerCharacter(Character):
         self.Features = ''
         self.Traits = ''
         pass
+    
+    def random_character(self, level=1):
+        #Currently only works for base game races
+        
+        self.Level = level
+        
+        raceList = [
+                'dwarf',
+                'elf',
+                'halfling',
+                'human',
+                'dragonborn',
+                'gnome',
+                'half-elf',
+                'half-orc',
+                'tiefling']
+        subraceList = {
+                'dwarf'     :[],
+                'elf'       :[],
+                'halfling'  :[],
+                'human'     :[],
+                'dragonborn':[],
+                'gnome'     :[],
+                'half-elf'  :[],
+                'half-orc'  :[],
+                'tiefling'  :[]}
+        alignmentList = [
+                'lg',
+                'ln',
+                'le',
+                'ng',
+                'tn',
+                'ne',
+                'cg',
+                'cn',
+                'ce'
+                ]
+        classList = [
+                'barbarian',
+                'bard',
+                'cleric',
+                'druid',
+                'fighter',
+                'monk',
+                'paladin',
+                'ranger',
+                'rogue',
+                'sorcerer',
+                'warlock',
+                'wizard'
+                ]
+        
+        self._roll_stats_()
+        
+        self.Race = _rselect_from_list(raceList)
+        self._apply_race_(self.Race, self.Level)
+        self.Alignment = _rselect_from_list(alignmentList)
+        self.Class = _rselect_from_list(classList)
+        
+    def _apply_race_(self, race, level=1):
+        
+        if race == 'dwarf':
+            self.Attributes['Constitution'] += 2
+    def _roll_stats_(self):
+        print('Autorolling stats:')
+        happy_check = False
+        while happy_check == False:
+            for attribute, value in list(self.Attributes.items()):
+                newVal = roll(20)
+                self.Attributes[attribute] = newVal
+                print(attribute.capitalize(), ' : ', self.Attributes[attribute])
+            happy_input = input('Happy? [N/y]')
+            if happy_input.upper() == 'Y':
+                happy_check = True
+            else:
+                print('Ungrateful bastard.')
+        return
+            
+            
 
 class NPC(Character):
     '''
@@ -250,3 +330,13 @@ def _install_check_():
             return False
         else:
             return True
+        
+def _rselect_from_list(_list):
+    listLength = len(_list) - 1
+    random_selector = random.randint(0,listLength)
+    selection = _list[random_selector]  
+    return selection
+
+def roll(d):
+    result = random.randint(1,d)
+    return result

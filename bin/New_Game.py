@@ -2,7 +2,7 @@
 
 import sys
 
-from lib import DnD_Engine
+import DnD_Engine
 
 
 if DnD_Engine._install_check_() is False:
