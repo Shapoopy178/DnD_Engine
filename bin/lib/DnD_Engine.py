@@ -150,6 +150,7 @@ class Character(object):
     def __init__(self, name):
         self.Name = name
         self.Class = ''
+        self.ProficiencyBonus = 0
         self.Level = 0
         self.Race = ''
         self.Alignment = ''
@@ -193,6 +194,12 @@ class Character(object):
         self.Speed = 0
         self.HitPoints = 0
         self.HitPoints_Max = 0
+        self.Darkvision = False
+        self.Advantages = {}
+        self.Resistances = []
+        self.Disadvantages = {}
+        self.Weaknesses = {}
+        self.Proficiencies = {}
 
 class PlayerCharacter(Character):
     '''
@@ -200,7 +207,6 @@ class PlayerCharacter(Character):
     def __init__(self, name):
         Character.__init__(self, name)
         self.Inspiration = 0
-        self.Proficiency = 0
         self.Initiative = 0
         self.Background = ''
         self.PlayerName = ''
@@ -211,7 +217,6 @@ class PlayerCharacter(Character):
         self.Flaws = ''
         self.Features = ''
         self.Traits = ''
-        pass
     
     def random_character(self, level=1):
         #Currently only works for base game races
@@ -270,18 +275,32 @@ class PlayerCharacter(Character):
         self._apply_race_(self.Race, self.Level)
         self.Alignment = _rselect_from_list(alignmentList)
         self.Class = _rselect_from_list(classList)
+        self._recalculate_modifiers_()
+        
+        print(self.Name)
+        print(self.Race.capitalize())
+        print(self.Alignment.upper())
+        print(self.Class.capitalize())
+        print('Attributes:')
+        for (attribute, value) in self.Attributes.items():
+            print('%-15s : %-3i+%3i = %i'%(attribute,value,self.Modifiers[attribute],self.Modifiers[attribute]+value))
         
     def _apply_race_(self, race, level=1):
         
         if race == 'dwarf':
             self.Attributes['Constitution'] += 2
+            self.Speed = 25
+            self.Darkvision = True
     def _roll_stats_(self):
         print('Autorolling stats:')
         happy_check = False
         while happy_check == False:
             for attribute, value in list(self.Attributes.items()):
-                newVal = roll(20)
-                self.Attributes[attribute] = newVal
+                rolls = []
+                for i in range(4):
+                    rolls.append(roll(6))
+                rolls.sort()
+                self.Attributes[attribute] = sum(rolls[-3:])
                 print(attribute.capitalize(), ' : ', self.Attributes[attribute])
             happy_input = input('Happy? [N/y]')
             if happy_input.upper() == 'Y':
@@ -289,9 +308,12 @@ class PlayerCharacter(Character):
             else:
                 print('Ungrateful bastard.')
         return
-            
-            
-
+    
+    def _recalculate_modifiers_(self):
+        self.Modifiers = {}
+        for (key, value) in self.Attributes.items():
+            self.Modifiers[key] = (value-(value%2)-10)/2
+    
 class NPC(Character):
     '''
     '''
