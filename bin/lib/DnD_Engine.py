@@ -155,69 +155,61 @@ class Character(object):
         self.Race = ''
         self.Alignment = ''
         self.Attributes = {
-                'Strength'      :       0,
-                'Dexterity'     :       0,
-                'Constitution'  :       0,
-                'Intelligence'  :       0,
-                'Wisdon'        :       0,
-                'Charisma'      :       0
+                'strength'      :       0,
+                'dexterity'     :       0,
+                'constitution'  :       0,
+                'intelligence'  :       0,
+                'wisdon'        :       0,
+                'charisma'      :       0
                 }
         self.SavingThrows = {
-                'Strength'      :       (False, 0),
-                'Dexterity'     :       (False, 0),
-                'Constitution'  :       (False, 0),
-                'Intelligence'  :       (False, 0),
-                'Wisdon'        :       (False, 0),
-                'Charisma'      :       (False, 0)
+                'strength'      :       (False, 0),
+                'dexterity'     :       (False, 0),
+                'constitution'  :       (False, 0),
+                'intelligence'  :       (False, 0),
+                'wisdon'        :       (False, 0),
+                'charisma'      :       (False, 0)
                 }
         self.Skills = {
-                'Acrobatics'        :       (False, 0),
-                'Animal Handline'   :       (False, 0),
-                'Arcana'            :       (False, 0),
-                'Athletics'         :       (False, 0),
-                'Deception'         :       (False, 0),
-                'History'           :       (False, 0),
-                'Insight'           :       (False, 0),
-                'Intimidation'      :       (False, 0),
-                'Investigation'     :       (False, 0),
-                'Medicine'          :       (False, 0),
-                'Nature'            :       (False, 0),
-                'Perception'        :       (False, 0),
-                'Performance'       :       (False, 0),
-                'Persuasion'        :       (False, 0),
-                'Religion'          :       (False, 0),
-                'Sleight of Hand'   :       (False, 0),
-                'Stealth'           :       (False, 0),
-                'Survival'          :       (False, 0)
+                'acrobatics'        :       (False, 0),
+                'animal handline'   :       (False, 0),
+                'arcana'            :       (False, 0),
+                'athletics'         :       (False, 0),
+                'deception'         :       (False, 0),
+                'history'           :       (False, 0),
+                'insight'           :       (False, 0),
+                'intimidation'      :       (False, 0),
+                'investigation'     :       (False, 0),
+                'medicine'          :       (False, 0),
+                'nature'            :       (False, 0),
+                'perception'        :       (False, 0),
+                'performance'       :       (False, 0),
+                'persuasion'        :       (False, 0),
+                'religion'          :       (False, 0),
+                'sleight of hand'   :       (False, 0),
+                'stealth'           :       (False, 0),
+                'survival'          :       (False, 0)
                 }
         self.ArmorClass = 0
         self.Speed = 0
         self.HitPoints = 0
         self.HitPoints_Max = 0
+        self.Languages = []
         self.Darkvision = False
-        self.Advantages = {}
+        self.Advantages = {
+                'saving throws' :   []
+                }
         self.Resistances = []
         self.Disadvantages = {}
         self.Weaknesses = {}
-        self.Proficiencies = {}
+        self.Proficiencies = {
+                'weapons'       :   [],
+                'armor'         :   [],
+                'tools'         :   [],
+                'instruments'   :   [],
+                'vehicles'      :   []
+                }
 
-class PlayerCharacter(Character):
-    '''
-    '''
-    def __init__(self, name):
-        Character.__init__(self, name)
-        self.Inspiration = 0
-        self.Initiative = 0
-        self.Background = ''
-        self.PlayerName = ''
-        self.Experience = 0
-        self.PersonalityTraits = ''
-        self.Ideals = ''
-        self.Bonds = ''
-        self.Flaws = ''
-        self.Features = ''
-        self.Traits = ''
-    
     def random_character(self, level=1):
         #Currently only works for base game races
         
@@ -233,8 +225,11 @@ class PlayerCharacter(Character):
                 'half-elf',
                 'half-orc',
                 'tiefling']
-        subraceList = {
-                'dwarf'     :[],
+        subraceDict = {
+                'dwarf'     :[
+                        'hill dwarf',
+                        'mountain dwarf'
+                        ],
                 'elf'       :[],
                 'halfling'  :[],
                 'human'     :[],
@@ -272,7 +267,10 @@ class PlayerCharacter(Character):
         self._roll_stats_()
         
         self.Race = _rselect_from_list(raceList)
+        self.__random_race_proficiency__(self.Race)
+        self.Subrace = _rselect_from_list(subraceDict[self.Race])
         self._apply_race_(self.Race, self.Level)
+        self._apply_subrace_(self.Subrace, self.Level)
         self.Alignment = _rselect_from_list(alignmentList)
         self.Class = _rselect_from_list(classList)
         self._recalculate_modifiers_()
@@ -283,14 +281,42 @@ class PlayerCharacter(Character):
         print(self.Class.capitalize())
         print('Attributes:')
         for (attribute, value) in self.Attributes.items():
-            print('%-15s : %-3i+%3i = %i'%(attribute,value,self.Modifiers[attribute],self.Modifiers[attribute]+value))
+            print('%-15s : %-3i+%3i = %i'%(attribute.capitalize(),value,self.Modifiers[attribute],self.Modifiers[attribute]+value))
         
+    def __random_race_proficiency__(self, race):
+        
+        proficiencyDict = {
+                'dwarf'     :   [
+                        "smith's tools",
+                        "brewer's tolls",
+                        "mason's tools"],
+                'elf'       :   [
+                        ]
+                }
+        
+        return
+    
     def _apply_race_(self, race, level=1):
         
         if race == 'dwarf':
             self.Attributes['Constitution'] += 2
             self.Speed = 25
             self.Darkvision = True
+            soft_append(self.Resistances, 'poison')
+            soft_append(self.Advantages['saving throws'], 'poison')
+            soft_append(self.Languages, 'common')
+            soft_append(self.Languages, 'dwarvish')
+            
+    def _apply_subrace_(self, subrace, level):
+        
+        if subrace == 'hill dwarf':
+            self.Attributes['wisdom'] += 1
+            self.HitPoints_Max += level
+        elif subrace == 'mountain dwarf':
+            self.Attributes['strength'] += 2
+            self.Proficiencies
+        
+            
     def _roll_stats_(self):
         print('Autorolling stats:')
         happy_check = False
@@ -313,6 +339,25 @@ class PlayerCharacter(Character):
         self.Modifiers = {}
         for (key, value) in self.Attributes.items():
             self.Modifiers[key] = (value-(value%2)-10)/2
+
+class PlayerCharacter(Character):
+    '''
+    '''
+    def __init__(self, name):
+        Character.__init__(self, name)
+        self.Inspiration = 0
+        self.Initiative = 0
+        self.Background = ''
+        self.PlayerName = ''
+        self.Experience = 0
+        self.PersonalityTraits = ''
+        self.Ideals = ''
+        self.Bonds = ''
+        self.Flaws = ''
+        self.Features = ''
+        self.Traits = ''
+    
+        return
     
 class NPC(Character):
     '''
@@ -355,10 +400,18 @@ def _install_check_():
         
 def _rselect_from_list(_list):
     listLength = len(_list) - 1
-    random_selector = random.randint(0,listLength)
+    try:
+        random_selector = random.randint(0,listLength)
+    except ValueError:
+        return None
     selection = _list[random_selector]  
     return selection
 
 def roll(d):
     result = random.randint(1,d)
     return result
+
+def soft_append(lst, addendum):
+    if addendum not in lst:
+        lst.append(addendum)
+    return
