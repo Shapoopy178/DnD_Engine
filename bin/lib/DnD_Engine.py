@@ -162,6 +162,7 @@ class Character(object):
                 'wisdon'        :       0,
                 'charisma'      :       0
                 }
+        #Bool is proficiency check, int is modifier
         self.SavingThrows = {
                 'strength'      :       (False, 0),
                 'dexterity'     :       (False, 0),
@@ -170,6 +171,7 @@ class Character(object):
                 'wisdon'        :       (False, 0),
                 'charisma'      :       (False, 0)
                 }
+        # Bool is proficiency check, int is modifier
         self.Skills = {
                 'acrobatics'        :       (False, 0),
                 'animal handline'   :       (False, 0),
@@ -207,7 +209,11 @@ class Character(object):
                 'armor'         :   [],
                 'tools'         :   [],
                 'instruments'   :   [],
-                'vehicles'      :   []
+                'vehicles'      :   [],
+                }
+        self.Spellbook = {
+                'cantrips'  :   [],
+                'spells'    :   []
                 }
 
     def random_character(self, level=1):
@@ -225,19 +231,26 @@ class Character(object):
                 'half-elf',
                 'half-orc',
                 'tiefling']
+        
         subraceDict = {
                 'dwarf'     :[
                         'hill dwarf',
                         'mountain dwarf'
                         ],
-                'elf'       :[],
+                'elf'       :[
+                        'high elf',
+                        'wood elf',
+                        'dark elf'
+                        ],
                 'halfling'  :[],
                 'human'     :[],
                 'dragonborn':[],
                 'gnome'     :[],
                 'half-elf'  :[],
                 'half-orc'  :[],
-                'tiefling'  :[]}
+                'tiefling'  :[]
+                }
+        
         alignmentList = [
                 'lg',
                 'ln',
@@ -249,6 +262,7 @@ class Character(object):
                 'cn',
                 'ce'
                 ]
+        
         classList = [
                 'barbarian',
                 'bard',
@@ -264,15 +278,35 @@ class Character(object):
                 'wizard'
                 ]
         
+        backgroundList = [
+                'acolyte',
+                'charlatan',
+                'criminal',
+                'entertainer',
+                'folk hero',
+                'guild artisan',
+                'hermit',
+                'noble',
+                'outlander',
+                'sage',
+                'sailor',
+                'urchin'
+                ]
+        
         self._roll_stats_()
         
         self.Race = _rselect_from_list(raceList)
         self.__random_race_proficiency__(self.Race)
         self.Subrace = _rselect_from_list(subraceDict[self.Race])
-        self._apply_race_(self.Race, self.Level)
-        self._apply_subrace_(self.Subrace, self.Level)
         self.Alignment = _rselect_from_list(alignmentList)
         self.Class = _rselect_from_list(classList)
+        self.Background = _rselect_from_list(backgroundList)
+        
+        self._apply_race_(self.Race, self.Level)
+        self._apply_subrace_(self.Subrace, self.Level)
+        self._apply_background_(self.Background)
+        self._apply_class_(self.Class)
+        self._set_proficiency_bonus_(self.Level)
         self._recalculate_modifiers_()
         
         print(self.Name)
@@ -281,7 +315,7 @@ class Character(object):
         print(self.Class.capitalize())
         print('Attributes:')
         for (attribute, value) in self.Attributes.items():
-            print('%-15s : %-3i+%3i = %i'%(attribute.capitalize(),value,self.Modifiers[attribute],self.Modifiers[attribute]+value))
+            print('%-15s : %-3i'%(attribute.capitalize(),value))
         
     def __random_race_proficiency__(self, race):
         
@@ -299,13 +333,23 @@ class Character(object):
     def _apply_race_(self, race, level=1):
         
         if race == 'dwarf':
-            self.Attributes['Constitution'] += 2
+            self.Attributes['constitution'] += 2
             self.Speed = 25
             self.Darkvision = True
+            for prof in ['battleaxe', 'handaxe', 'light hammer', 'warhammer']:
+                soft_append(self.Proficiencies['weapons'], prof)
             soft_append(self.Resistances, 'poison')
             soft_append(self.Advantages['saving throws'], 'poison')
             soft_append(self.Languages, 'common')
             soft_append(self.Languages, 'dwarvish')
+        elif race == 'elf':
+            self.Attributes['dexterity'] += 2
+            self.Speed = 30
+            self.Darkvision = True
+            self.Skills['perception'][0] = True
+            soft_append(self.Languages, 'common')
+            soft_append(self.Languages, 'elvish')
+            
             
     def _apply_subrace_(self, subrace, level):
         
@@ -315,8 +359,38 @@ class Character(object):
         elif subrace == 'mountain dwarf':
             self.Attributes['strength'] += 2
             self.Proficiencies
-        
+        elif subrace == 'high elf':
+            self.Attributes['intelligence'] += 1
+            for prof in ['lognsword', 'shortsword', 'shortbow', 'longbow']:
+                soft_append(self.Proficiencies['weapons'], prof)
+            #!!!Also add 1 cantrip of choice
+            #!!!Also add 1 language of choice
+        elif subrace == 'wood elf':
+            self.Attributes['wisdon'] += 1
+            for prof in ['lognsword', 'shortsword', 'shortbow', 'longbow']:
+                soft_append(self.Proficiencies['weapons'], prof)
+            self.Speed = 35
+            #!!!Also Mask of the Wild
+        elif subrace == 'dark elf':
+            self.Attributes['charisma'] += 1
+            self.Darkvision = True      #!!!Actually should be enhanced darkvision, change later
+            #!!!Sunlight Sensitivity
+            soft_append(self.Spellbook['cantrips'], 'dancing lights')
+            if level >= 3:
+                soft_append(self.Spellbook['spells'], 'faerie fire')
+            if level >=5:
+                soft_append(self.Spellbook['spells'], 'darkness')
+            for prof in ['rapier', 'shortsword', 'crossbow']:
+                soft_append(self.Proficiencies['weapons'], prof)
+                        
             
+    def _apply_background_(self, background):
+        return
+    
+    def _apply_class_(self, _class):
+        pass
+        return
+
     def _roll_stats_(self):
         print('Autorolling stats:')
         happy_check = False
@@ -333,6 +407,14 @@ class Character(object):
                 happy_check = True
             else:
                 print('Ungrateful bastard.')
+        return
+    
+    def _set_proficiency_bonus_(self, level):
+        if level == 1:
+            self.ProficiencyBonus = 2
+        else:
+            self.ProficiencyBonus = 0
+            
         return
     
     def _recalculate_modifiers_(self):
