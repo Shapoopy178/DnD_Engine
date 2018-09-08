@@ -154,6 +154,7 @@ class Character(object):
         self.Level = 0
         self.Race = ''
         self.Alignment = ''
+        self.Size = 1
         self.Attributes = {
                 'strength'      :       0,
                 'dexterity'     :       0,
@@ -213,7 +214,8 @@ class Character(object):
                 }
         self.Spellbook = {
                 'cantrips'  :   [],
-                'spells'    :   []
+                'spells'    :   [],
+                'other'     :   []
                 }
 
     def random_character(self, level=1):
@@ -242,10 +244,29 @@ class Character(object):
                         'wood elf',
                         'dark elf'
                         ],
-                'halfling'  :[],
-                'human'     :[],
-                'dragonborn':[],
-                'gnome'     :[],
+                'halfling'  :[
+                        'lightfoot',
+                        'stout'
+                        ],
+                'human'     :[
+                        'human'
+                        ],
+                'dragonborn':[
+                        'black',
+                        'blue',
+                        'brass',
+                        'bronze',
+                        'copper',
+                        'gold',
+                        'green',
+                        'red',
+                        'silver',
+                        'white'
+                        ],
+                'gnome'     :[
+                        'forest gnome',
+                        'rock gnome'
+                        ],
                 'half-elf'  :[],
                 'half-orc'  :[],
                 'tiefling'  :[]
@@ -334,55 +355,203 @@ class Character(object):
         
         if race == 'dwarf':
             self.Attributes['constitution'] += 2
+            self.Size = 2
             self.Speed = 25
             self.Darkvision = True
             for prof in ['battleaxe', 'handaxe', 'light hammer', 'warhammer']:
                 soft_append(self.Proficiencies['weapons'], prof)
             soft_append(self.Resistances, 'poison')
             soft_append(self.Advantages['saving throws'], 'poison')
-            soft_append(self.Languages, 'common')
-            soft_append(self.Languages, 'dwarvish')
+            for language in ['common', 'dwarvish']:
+                soft_append(self.Languages, language)
+
         elif race == 'elf':
             self.Attributes['dexterity'] += 2
+            self.Size = 2
             self.Speed = 30
             self.Darkvision = True
             self.Skills['perception'][0] = True
-            soft_append(self.Languages, 'common')
-            soft_append(self.Languages, 'elvish')
+            for language in ['common', 'elvish']:
+                soft_append(self.Languages, language)
+                
+        elif race == 'halfling':
+            self.Attributes['dexterity'] += 2
+            self.Size = 1 #Small
+            self.Speed = 25
+            #!!!Lucky
+            soft_append(self.Advantages['saving throws'],'fear')
+            #!!!Halfling nimbleness
+            for language in ['common', 'halfling']:
+                soft_append(self.Languages, language)
             
+        elif race == 'human':
+            for attribute in self.Attributes.keys():
+                self.Attributes[attribute] += 1
+            self.Size = 2 #Medium
+            self.Speed  = 30
+            soft_append(self.Languages, 'common')
+            #!!!1 additional language of choice
+            
+        elif race == 'dragonborn':
+            self.Attributes['strength'] += 2
+            self.Attributes['charisma'] += 1
+            self.Size = 2
+            self.Speed = 30
+            soft_append(self.Spellbook['other'], 'breath weapon')
+            for language in ['common', 'draconic']:
+                soft_append(self.Languages, language)
+                
+        elif race == 'gnome':
+            self.Attributes['intelligence'] += 2
+            self.Size = 1
+            self.Speed = 25
+            self.Darkvision = True
+            for ad in ['intelligence - magic', 'wisdom - magic', 'charisma - magic']:
+                soft_append(self.Advantages['saving throws'], ad)
+            for language in ['common', 'gnomish']:
+                soft_append(self.Languages, language)
+        
+        elif race == 'half-elf':
+            self.Attributes['charisma'] += 2
+            #111 2 additional attributes of choice
+            self.Size = 2
+            self.Speed = 30
+            self.Darkvision = True
+            soft_append(self.Advantages['saving throws'], 'charm')
+        
+            #!!! Skill Versatility
+            for language in ['common', 'elvish']:
+                soft_append(self.Languages, language)
+                #!!! One additional language of choice
+        
+        elif race == 'half-orc':
+            self.Attributes['strength'] += 2
+            self.Attributes['constitution'] += 1
+            self.Size = 2
+            self.Speed = 30
+            self.Darkvision = True
+            self.Skills['intimidation'][0] = True
+            #!!! Relentless Endurance
+            #!!! Savage Attacks
+            for language in ['common', 'orc']:
+                soft_append(self.Languages, language)
+        
+        elif race == 'tiefling':
+            self.Attributes['intelligence'] += 1
+            self.Attributes['charisma'] += 2
+            self.Size = 2
+            self.Speed = 30
+            self.Darkvision = True
+            soft_append(self.Resistances, 'fire')
+            soft_append(self.Spellbook['cantrips'], 'thaumaturgy')
+            if level >= 3:
+                soft_append(self.Spellbook['spells'], 'hellish rebuke')
+            if level >= 5:
+                soft_append(self.Spellbook['spells'], 'darkness')
+            for language in ['common', 'infernal']:
+                soft_append(self.Languages, language)
             
     def _apply_subrace_(self, subrace, level):
         
-        if subrace == 'hill dwarf':
-            self.Attributes['wisdom'] += 1
-            self.HitPoints_Max += level
-        elif subrace == 'mountain dwarf':
-            self.Attributes['strength'] += 2
-            self.Proficiencies
-        elif subrace == 'high elf':
-            self.Attributes['intelligence'] += 1
-            for prof in ['lognsword', 'shortsword', 'shortbow', 'longbow']:
-                soft_append(self.Proficiencies['weapons'], prof)
-            #!!!Also add 1 cantrip of choice
-            #!!!Also add 1 language of choice
-        elif subrace == 'wood elf':
-            self.Attributes['wisdon'] += 1
-            for prof in ['lognsword', 'shortsword', 'shortbow', 'longbow']:
-                soft_append(self.Proficiencies['weapons'], prof)
-            self.Speed = 35
-            #!!!Also Mask of the Wild
-        elif subrace == 'dark elf':
-            self.Attributes['charisma'] += 1
-            self.Darkvision = True      #!!!Actually should be enhanced darkvision, change later
-            #!!!Sunlight Sensitivity
-            soft_append(self.Spellbook['cantrips'], 'dancing lights')
-            if level >= 3:
-                soft_append(self.Spellbook['spells'], 'faerie fire')
-            if level >=5:
-                soft_append(self.Spellbook['spells'], 'darkness')
-            for prof in ['rapier', 'shortsword', 'crossbow']:
-                soft_append(self.Proficiencies['weapons'], prof)
-                        
+        if self.Race == 'dwarf':
+        
+            if subrace == 'hill dwarf':
+                self.Attributes['wisdom'] += 1
+                self.HitPoints_Max += level
+                
+            elif subrace == 'mountain dwarf':
+                self.Attributes['strength'] += 2
+                self.Proficiencies
+                
+            else:
+                print('Unrecognized subrace. No modifiers applied.')
+                
+        elif self.Race == 'elf':        
+            
+            if subrace == 'high elf':
+                self.Attributes['intelligence'] += 1
+                for prof in ['lognsword', 'shortsword', 'shortbow', 'longbow']:
+                    soft_append(self.Proficiencies['weapons'], prof)
+                #!!!Also add 1 cantrip of choice
+                #!!!Also add 1 language of choice
+                
+            elif subrace == 'wood elf':
+                self.Attributes['wisdon'] += 1
+                for prof in ['lognsword', 'shortsword', 'shortbow', 'longbow']:
+                    soft_append(self.Proficiencies['weapons'], prof)
+                self.Speed = 35
+                #!!!Also Mask of the Wild
+                
+            elif subrace == 'dark elf':
+                self.Attributes['charisma'] += 1
+                self.Darkvision = True      #!!!Actually should be enhanced darkvision, change later
+                #!!!Sunlight Sensitivity
+                soft_append(self.Spellbook['cantrips'], 'dancing lights')
+                if level >= 3:
+                    soft_append(self.Spellbook['spells'], 'faerie fire')
+                if level >=5:
+                    soft_append(self.Spellbook['spells'], 'darkness')
+                for prof in ['rapier', 'shortsword', 'crossbow']:
+                    soft_append(self.Proficiencies['weapons'], prof)
+                    
+        elif self.Race == 'halfling':
+            
+            if subrace == 'lightfoot':
+                self.Attributes['charisma'] += 1
+                #!!!Naturally stealthy
+                
+            elif subrace == 'stout':
+                self.Attributes['constitution'] += 1
+                soft_append(self.Resistances, 'poison')
+                soft_append(self.Advantages['saving throws'], 'poison')
+                
+        elif self.Race == 'human':
+            pass
+        
+        elif self.Race == 'dragonborn':
+            
+            if subrace == 'black':
+                soft_append(self.Resistances, 'acid')
+            elif subrace == 'blue':
+                soft_append(self.Resistances, 'lightning')
+            elif subrace == 'brass':
+                soft_append(self.Resistances, 'fire')
+            elif subrace == 'bronze':
+                soft_append(self.Resistances, 'lightning')
+            elif subrace == 'bronze':
+                soft_append(self.Resistances, 'acid')
+            elif subrace == 'gold':
+                soft_append(self.Resistances, 'fire')
+            elif subrace == 'green':
+                soft_append(self.Resistances, 'poison')
+            elif subrace == 'red':
+                soft_append(self.Resistances, 'fire')
+            elif subrace == 'silver':
+                soft_append(self.Resistances, 'cold')
+            elif subrace == 'white':
+                soft_append(self.Resistances, 'cold')
+                
+        elif self.Race == 'gnome':
+            
+            if subrace == 'forest gnome':
+                self.Attributes['dexterity'] += 1
+                soft_append(self.Spellbook['cantrips'], 'minor illusion')
+                soft_append(self.Languages, 'small beasts')
+                
+            elif subrace == 'rock gnome':
+                self.Attributes['constitution'] += 1
+                #!!! Artificier's Lore
+                soft_append(self.Proficiencies['tools'], "tinker's tools")
+                    #!!! Additional Tinker buffs
+            
+        elif self.Race == 'half-elf':
+            pass
+        
+        elif self.Race == 'half-orc':
+            pass
+        
+        elif self.Race == 'tiefling':
+            pass
             
     def _apply_background_(self, background):
         return
@@ -406,7 +575,7 @@ class Character(object):
             if happy_input.upper() == 'Y':
                 happy_check = True
             else:
-                print('Ungrateful bastard.')
+                print('Ungrateful shit.')
         return
     
     def _set_proficiency_bonus_(self, level):
